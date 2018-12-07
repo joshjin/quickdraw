@@ -375,13 +375,13 @@ def cc_prediction_datasetup(df1,df2,df3,df4, countries = ['US','BR','RU','KR'],\
     #KR
     df_KR = _country_initial_fixer(df,countries[3],limit)
 
-    print len(df_US),len(df_BR),len(df_RU),len(df_KR)
+    print(len(df_US),len(df_BR),len(df_RU),len(df_KR))
 
     new_df = pd.concat([df_US,df_BR,df_RU,df_KR], axis=0)
     Y = new_df.pop('countrycode')
     new_df = new_df.drop(['word'], axis=1)
     b_loon = {}
-    for i in xrange(len(countries)):
+    for i in range(len(countries)):
         b_loon[countries[i]] = i
     Y = Y.map(b_loon)
 
