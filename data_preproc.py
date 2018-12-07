@@ -12,11 +12,19 @@ import warnings
 warnings.filterwarnings("ignore")
 
 def read_data(path):
+    '''
+    :param path: the path to the csv file to read
+    :return: top 10000 entries
+    '''
     df = pd.read_csv(path, skiprows=1, names=["country", "drawing", "key_id", "recognized", "timestamp", "word"])
     return df.head(10000)
 
 
 def get_x(l):
+    '''
+    :param l: a list of [x, y, t]'s
+    :return: only the x in one long list
+    '''
     x = []
     for stroke in l:
         x = x + ([round(k) for k in stroke[0]])
@@ -24,6 +32,10 @@ def get_x(l):
 
 
 def get_y(l):
+    '''
+    :param l: a list of [x, y, t]'s
+    :return: only the y in one long list
+    '''
     y = []
     for stroke in l:
         y = y + ([round(k) for k in stroke[1]])
@@ -31,10 +43,21 @@ def get_y(l):
 
 
 def array_normalizer(array1, Xmin, Xmax, array_min):
+    '''
+    :param array1: array that you want to normalize (1D array or list)
+    :param Xmin: minimum value of your X array (int)
+    :param Xmax: maximum value of your X array (int)
+    :param array_min: minimum value of array1
+    :return: normalized array of array1
+    '''
     return (np.array(array1)-np.array([array_min]*len(array1)))/float(Xmax-Xmin)
 
 
 def process_df(df):
+    '''
+    :param df: a pandas dataframe in the raw format of quickdraw database
+    :return: a dataframe with normalized entries
+    '''
     df = df[(df['recognized']==1)]
     df['drawing'] = df['drawing'].apply(literal_eval)
     df['stroke_count'] = df['drawing'].map(lambda x: len(x))
@@ -62,6 +85,13 @@ def process_df(df):
 
 
 def convert_df_into_image(df):
+    '''
+    :param df: dataframe from process_df
+    :return: a dataframe with column ('word', 'image', 'country')
+             word: the class of the image
+             image: an image in np array of (1, 42*42), with value of 1 or 0
+             country: country of the doodler
+    '''
     df.index = range(len(df))
     images = {}
     for ind in df.index:
@@ -78,8 +108,10 @@ def convert_df_into_image(df):
     return result_df.dropna()
 
 
+'''
+Uncomment to test functions from above
+'''
 # car_df = read_data("519_refined_data/data/car.csv")
 # car_df = process_df(car_df)
 # car_df = convert_df_into_image(car_df)
-# car_df.to_csv('tmp.csv')
-# car_df.loc[1]
+# print(car_df.head(10))
