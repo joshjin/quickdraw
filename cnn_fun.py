@@ -91,7 +91,7 @@ def CNN_image_recognition(df1,df2,df3,df4,sample=30000,binary=False,\
     #from input dataframes, create 1 X dataframe and label
     #get X AND y
     Xtemp1, labeldump = image_identification_datasetup(df1,df2,sample=sample)
-    xtemp2, labeldump = image_identification_datasetup(df3,df4,sample=sample)
+    Xtemp2, labeldump = image_identification_datasetup(df3,df4,sample=sample)
     label = sample*[0]+sample*[1]+sample*[2]+sample*[3]
     label = pd.Series(label)
     X = pd.concat([Xtemp1,Xtemp2], axis = 0)
