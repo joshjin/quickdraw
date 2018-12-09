@@ -4,6 +4,7 @@ from ast import literal_eval
 import warnings
 import torch
 import os
+from PIL import Image
 import matplotlib.pyplot as plt
 import torch.nn as nn
 import torch.nn.functional as F
@@ -20,21 +21,49 @@ warnings.filterwarnings("ignore")
 # Run Experiment
 ############################################################
 
+def print_img(im, label):
+    data = im.copy().astype(int)
+    print(data.shape)
+    print(data)
+    i_data = np.zeros((42, 42, 3), dtype=np.uint8)
+    for j in range(0,3):
+        i_data[:,:,j] = data*200
+    img = Image.fromarray(i_data, 'RGB')
+    img.save("test_img" + str(label) + ".png")
 
 def extract_data(path):
     X = []
     y = []
-    for file in os.listdir():
-        df = data_preproc.read_data(path)
+    for file in os.listdir(path):
+        print('class: ', str(file))
+        print(os.path.join(path, file))
+        df = data_preproc.read_data(os.path.join(path, file))
         df = data_preproc.process_df(df)
-        df = data_preproc.convert_df_into_image(df)
+        df = data_preproc.convert_df_into_image(df).reset_index()
         data_len =df.shape[0]
+        print(df.shape)
         X_np_tmp = np.zeros(shape=(data_len, 42, 42))
         y_np_tmp = np.zeros(shape=(data_len,))
-        for i in df.index:
-            x_tmp = df.loc[i, 'image']
+        for i in range(0, min(data_len, 5000)):
+            if i % 1000 == 0:
+                print(str(i), ' iterations')
+            X_tmp = df.loc[i, 'image']
             y_tmp = df.loc[i, 'word']
+            X_tmp_square = X_tmp.reshape(42, 42)
+            X_np_tmp[i,:,:]=X_tmp_square
+            y_num = data_preproc.cls_dict[y_tmp]
+            y_np_tmp[i] = y_num
+        X.append(X_np_tmp.tolist())
+        y.append(y_np_tmp.tolist())
+        print(len(X))
+        print(len(y))
     return X, y
+
+
+X, y = extract_data(os.path.join("519_refined_data", "data"))
+np.save('X.npy', X)
+np.save('y.npy', y)
+
 
 
 class Dataset(Dataset):
