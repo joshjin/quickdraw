@@ -37,14 +37,14 @@ def extract_data(path):
     for file in os.listdir(path):
         print('class: ', str(file))
         print(os.path.join(path, file))
-        df = data_preproc.read_data(os.path.join(path, file))
+        df = data_preproc.read_data(os.path.join(path, file), 50000)
         df = data_preproc.process_df(df)
         df = data_preproc.convert_df_into_image(df).reset_index()
         data_len =df.shape[0]
         print(df.shape)
-        X_np_tmp = np.zeros(shape=(data_len, 42, 42))
-        y_np_tmp = np.zeros(shape=(data_len,))
-        for i in range(0, min(data_len, 5000)):
+        X_np_tmp = np.zeros(shape=(min(data_len, 20000), 42, 42))
+        y_np_tmp = np.zeros(shape=(min(data_len, 20000),))
+        for i in range(0, min(data_len, 20000)):
             if i % 1000 == 0:
                 print(str(i), ' iterations')
             X_tmp = df.loc[i, 'image']
@@ -53,17 +53,47 @@ def extract_data(path):
             X_np_tmp[i,:,:]=X_tmp_square
             y_num = data_preproc.cls_dict[y_tmp]
             y_np_tmp[i] = y_num
-        X.append(X_np_tmp.tolist())
-        y.append(y_np_tmp.tolist())
+        X = X + X_np_tmp.tolist()
+        y = y + y_np_tmp.tolist()
         print(len(X))
         print(len(y))
     return X, y
 
 
-X, y = extract_data(os.path.join("519_refined_data", "data"))
-np.save('X.npy', X)
-np.save('y.npy', y)
+# X, y = extract_data(os.path.join("519_refined_data", "data"))
+# np.save('X.npy', X)
+# np.save('y.npy', y)
 
+
+class ConvolutionalNN(nn.Module):
+    """
+        (1) Use self.conv1 as the variable name for your first convolutional layer
+        (2) Use self.pool as the variable name for your pooling layer
+        (3) User self.conv2 as the variable name for your second convolutional layer
+        (4) Use self.fc1 as the variable name for your first fully connected layer
+        (5) Use self.fc2 as the variable name for your second fully connected layer
+        (6) Use self.fc3 as the variable name for your third fully connected layer
+    """
+
+    def __init__(self):
+        super(ConvolutionalNN, self).__init__()
+        self.conv1 = nn.Conv2d(3, 7, 3, stride=1, padding=0)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.conv2 = nn.Conv2d(7, 16, 3, stride=1, padding=0)
+        self.fc1 = nn.Linear(13 * 13 * 16, 130)
+        self.fc2 = nn.Linear(130, 72)
+        self.fc3 = nn.Linear(72, 10)
+
+    def forward(self, x):
+        z1 = F.relu(self.conv1(x))
+        z2 = self.pool(z1)
+        z3 = F.relu(self.conv2(z2))
+        z4 = z3.view(z3.size(0), -1)
+        z5 = F.relu(self.fc1(z4))
+        z6 = F.relu(self.fc2(z5))
+        z7 = F.sigmoid(self.fc3(z6))
+
+        return z7
 
 
 class Dataset(Dataset):
@@ -80,8 +110,8 @@ class Dataset(Dataset):
     def __getitem__(self, idx):
         return self.x_data[idx], self.y_data[idx]
 
-'''
-def run_experiment():
+
+def run_experiment(neural_network, train_loader, test_loader, loss_function, optimizer):
     max_epochs = 100
     loss_np = np.zeros((max_epochs))
     train_accuracy = np.zeros((max_epochs))
@@ -130,5 +160,5 @@ def run_experiment():
 
     # print("final training accuracy: ", test_accuracy[max_epochs-1])
     return test_accuracy, train_accuracy, loss_np
-'''
+
 
