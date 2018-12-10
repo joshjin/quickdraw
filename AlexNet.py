@@ -80,11 +80,12 @@ def load_data(X_file, y_file):
     X = np.load(X_file)
     y = np.load(y_file)
     X_ = np.zeros((X.shape[0], 1, X.shape[1], X.shape[2]))
+    print(X.shape)
     for i in range(X.shape[0]):
-        X_[i, 1, :, :] =X[i,:,:]
+        X_[i, 0, :, :] =X[i,:,:]
     print(X_.shape)
     print(y.shape)
-    return X, y
+    return X_, y
 
 
 def load_data_for_alex(X_file, y_file):
@@ -113,7 +114,7 @@ def load_data_for_alex(X_file, y_file):
 # np.save('y.npy', y)
 
 
-class ConvolutionalNN(nn.Module):
+class LeNet5(nn.Module):
     """
         (1) Use self.conv1 as the variable name for your first convolutional layer
         (2) Use self.pool as the variable name for your pooling layer
@@ -124,24 +125,24 @@ class ConvolutionalNN(nn.Module):
     """
 
     def __init__(self):
-        super(ConvolutionalNN, self).__init__()
-        self.conv1 = nn.Conv2d(1, 7, 3, stride=1, padding=0)
+        super(LeNet5, self).__init__()
+        self.conv1 = nn.Conv2d(1, 6, 7, stride=1, padding=0)
         self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(7, 16, 3, stride=1, padding=0)
-        self.fc1 = nn.Linear(13 * 13 * 16, 130)
-        self.fc2 = nn.Linear(130, 72)
-        self.fc3 = nn.Linear(72, 10)
+        self.conv2 = nn.Conv2d(6, 16, 5, stride=1, padding=0)
+        self.fc1 = nn.Linear(7 * 7 * 16, 400)
+        self.fc2 = nn.Linear(400, 120)
+        self.fc3 = nn.Linear(120, 10)
 
     def forward(self, x):
         z1 = F.relu(self.conv1(x))
         z2 = self.pool(z1)
         z3 = F.relu(self.conv2(z2))
-        z4 = z3.view(z3.size(0), -1)
-        z5 = F.relu(self.fc1(z4))
-        z6 = F.relu(self.fc2(z5))
-        z7 = F.sigmoid(self.fc3(z6))
-
-        return z7
+        z4 = self.pool(z3)
+        z5 = z4.view(z4.size(0), -1)
+        z6 = F.relu(self.fc1(z5))
+        z7 = F.relu(self.fc2(z6))
+        z8 = F.sigmoid(self.fc3(z7))
+        return z8
 
 
 class Dataset(Dataset):
