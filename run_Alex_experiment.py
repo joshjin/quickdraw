@@ -18,38 +18,39 @@ from torchvision import transforms
 # np.save('X_test_small.npy', X_test)
 # np.save('y_test_small.npy', y_test)
 
-train_X, train_y = an.load_data('X_train_small.npy', 'y_train_small.npy')
+
+
+train_X, train_y = an.load_data_for_alex('X_train_small.npy', 'y_train_small.npy')
 print("raw train dim")
 print(train_X.shape)
 print(train_y.shape)
 
-cnn_train_dataset = an.Dataset(train_X, train_y)
-cnn_train_loader = DataLoader(dataset=cnn_train_dataset,
+alex_train_dataset = an.Dataset(train_X, train_y)
+alex_train_loader = DataLoader(dataset=alex_train_dataset,
                           batch_size=64,
                           shuffle=True)
 
-test_X, test_y = an.load_data('X_test_small.npy', 'y_test_small.npy')
+test_X, test_y = an.load_data_for_alex('X_test_small.npy', 'y_test_small.npy')
 print("raw train dim")
 print(test_X.shape)
 print(test_y.shape)
 
-cnn_test_dataset = an.Dataset(test_X, test_y)
-cnn_test_loader = DataLoader(dataset=cnn_test_dataset,
+alex_test_dataset = an.Dataset(test_X, test_y)
+alex_test_loader = DataLoader(dataset=alex_test_dataset,
                           batch_size=64,
                           shuffle=True)
 
 print('\ninit NN')
-CNN = an.LeNet5()
+AlexNN = an.AlexNN()
 
 print('\ninit optimizer')
-optimizer1 = optim.SGD(CNN.parameters(), lr=0.005, momentum=0.9)
+optimizer1 = optim.SGD(AlexNN.parameters(), lr=0.005, momentum=0.9)
 
 print('\ninit loss fn')
 criterion = nn.CrossEntropyLoss()
 
 print('\ntraining')
-cnn_norm_test_accuracy, cnn_norm_train_accuracy, cnn_norm_loss = an.run_experiment(CNN, cnn_train_loader, cnn_test_loader, criterion, optimizer1)
+cnn_norm_test_accuracy, cnn_norm_train_accuracy, cnn_norm_loss = an.run_experiment(AlexNN, alex_train_loader, alex_test_loader, criterion, optimizer1)
 
 print('\nterm')
-
 

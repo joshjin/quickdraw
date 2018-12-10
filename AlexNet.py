@@ -82,7 +82,7 @@ def load_data(X_file, y_file):
     X_ = np.zeros((X.shape[0], 1, X.shape[1], X.shape[2]))
     print(X.shape)
     for i in range(X.shape[0]):
-        X_[i, 0, :, :] =X[i,:,:]
+        X_[i, 0, :, :] = X[i,:,:]
     print(X_.shape)
     print(y.shape)
     return X_, y
@@ -90,23 +90,21 @@ def load_data(X_file, y_file):
 
 def load_data_for_alex(X_file, y_file):
     X = np.load(X_file)
-    X_len = X.shape[0]
-    # X_large = np.zeros((X_len, 1, 5*42, 5*42))
-    # for i in range(X_len):
-    #     X_large[i, 1, :, :] =
-
-    # for i in range(X_len):
-    #     X_large[i,1,:,:] = resize(X[i,:,:], (42*5, 42*5))
-    # y = np.load(y_file)
-    #small_img = np.reshape(X[1,:,:], (42, 42))
-    #print_img(small_img, "small_test", 42)
-    #small_img = cv2.imread('small_test.png')
-    img = cv2.resize(np.reshape(X[1,:,:], (42, 42)), dsize=(42*5, 42*5), interpolation=cv2.INTER_CUBIC)
-    # img = resize(np.reshape(X[1,:,:]*200, (42, 42)), (5*42, 5*42), PIL.Image.ANTIALIAS)
-    # print_img(img, "large_test", 42*5)
-    # return X, y
-    cv2.imshow('image', img)
-    cv2.waitKey(0)
+    y = np.load(y_file)
+    print("successfully loaded data")
+    X_ = np.zeros((X.shape[0], 1, 227, 227))
+    for i in range(X.shape[0]):
+        if i%3000==0:
+            print(str(i/300), " percent done")
+        img_tmp = cv2.resize(np.reshape(X[i,:,:], (42, 42)), dsize=(42*5, 42*5), interpolation=cv2.INTER_CUBIC)
+        X_[i, 0, 10:220, 10:220] = img_tmp
+    print(X_.shape)
+    print(y.shape)
+    # img = np.reshape(X_[2,0,:,:], (227, 227))
+    # cv2.imshow('image', img)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+    return X_, y
 
 
 # X, y = extract_data(os.path.join("519_refined_data", "data"))
@@ -143,6 +141,44 @@ class LeNet5(nn.Module):
         z7 = F.relu(self.fc2(z6))
         z8 = F.sigmoid(self.fc3(z7))
         return z8
+
+
+class AlexNN(nn.Module):
+    """
+        (1) Use self.conv1 as the variable name for your first convolutional layer
+        (2) Use self.pool as the variable name for your pooling layer
+        (3) User self.conv2 as the variable name for your second convolutional layer
+        (4) Use self.fc1 as the variable name for your first fully connected layer
+        (5) Use self.fc2 as the variable name for your second fully connected layer
+        (6) Use self.fc3 as the variable name for your third fully connected layer
+    """
+
+    def __init__(self):
+        super(AlexNN, self).__init__()
+        self.conv1 = nn.Conv2d(1, 96, 11, stride=4, padding=2)
+        self.pool1 = nn.MaxPool2d(kernel_size=3, stride=2)
+        self.conv2 = nn.Conv2d(96, 256, 5, stride=1, padding=2)
+        self.pool2 = nn.MaxPool2d(kernel_size=3, stride=2)
+        self.conv3 = nn.Conv2d(256, 384, 3, stride=1, padding=1)
+        self.conv4 = nn.Conv2d(384, 256, 3, stride=1, padding=1)
+        self.pool3 = nn.MaxPool2d(kernel_size=3, stride=2)
+        self.fc1 = nn.Linear(6*6*256, 4096)
+        self.fc2 = nn.Linear(4096, 1000)
+        self.fc3 = nn.Linear(1000, 10)
+
+    def forward(self, x):
+        z1 = F.relu(self.conv1(x))
+        z2 = self.pool1(z1)
+        z3 = F.relu(self.conv2(z2))
+        z4 = self.pool2(z3)
+        z5 = F.relu(self.conv3(z4))
+        z6 = F.relu(self.conv4(z5))
+        z7 = self.pool3(z6)
+        z8 = z7.view(z7.size(0), -1)
+        z9 = F.relu(self.fc1(z8))
+        z10 = F.relu(self.fc2(z9))
+        z11 = F.sigmoid(self.fc3(z10))
+        return z11
 
 
 class Dataset(Dataset):
