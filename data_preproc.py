@@ -11,13 +11,17 @@ from ast import literal_eval
 import warnings
 warnings.filterwarnings("ignore")
 
-def read_data(path):
+
+cls_dict = {'car':0, 'cat':1, 'cow':2, 'dog':3, 'duck':4, 'flower':5, 'mouse':6, 'school bus':7, 'train':8, 'tree':9}
+
+
+def read_data(path, num):
     '''
     :param path: the path to the csv file to read
     :return: top 10000 entries
     '''
     df = pd.read_csv(path, skiprows=1, names=["country", "drawing", "key_id", "recognized", "timestamp", "word"])
-    return df.head(10000)
+    return df.head(num)
 
 
 def get_x(l):
@@ -98,7 +102,7 @@ def convert_df_into_image(df):
         image = np.zeros((42, 42))
         x_array = np.around(np.array(df.loc[ind, 'x_norm']) * 42)
         y_array = np.around(np.array(df.loc[ind, 'y_norm']) * 42 / float(df.loc[ind, 'y_max']))
-        x_array[x_array>=28.] = 27
+        x_array[x_array>=42.] = 41
         y_array[y_array>=42.] = 41
         for i in range(len(x_array)):
             image[int(np.around(y_array[i])), int(np.around(x_array[i]))] = 1
