@@ -14,6 +14,7 @@ from torch.utils.data import Dataset, DataLoader
 from torch.autograd import Variable
 import data_preproc
 from torchvision import transforms
+from sklearn.metrics import roc_curve, auc
 
 warnings.filterwarnings("ignore")
 
@@ -246,4 +247,9 @@ def run_experiment(neural_network, train_loader, test_loader, loss_function, opt
     # print("final training accuracy: ", test_accuracy[max_epochs-1])
     return test_accuracy, train_accuracy, loss_np
 
+def print_roc(y_train, test, probas):
+    fpr, tpr, thres = roc_curve(y_train[test],
+                                probas[:, 1], pos_label=1)
+    roc_auc = auc(fpr, tpr)
+    return roc_auc
 
