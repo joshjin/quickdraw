@@ -13,8 +13,18 @@ warnings.filterwarnings("ignore")
 
 
 cls_dict = {'car':0, 'cat':1, 'cow':2, 'dog':3, 'duck':4, 'flower':5, 'mouse':6, 'school bus':7, 'train':8, 'tree':9}
-
-
+cls_20 = {'bed':15, 'chair':16, 'hot tub':17, 'stove':18, 'table':19,
+          'camera':5, 'computer':6, 'keyboard':7, 'laptop':8, 'toaster':9,
+          'bush':10, 'flower':11, 'grass':12, 'house plant':13, 'tree':14,
+          'ambulance':0, 'car':1, 'school bus':2, 'train':3, 'van':4,
+          'cat':20, 'dog':21, 'lion':22, 'pig':23, 'tiger':24}
+cls_ordered_small = {'ambulance':0, 'bed':1, 'bush':2, 'camera':3, 'car':4,
+                     'cat':5, 'chair':6, 'computer':7, 'dog':8, 'flower':9,
+                     'grass':10, 'hot tub':11, 'house plant':12, 'keyboard':13, 'laptop':14,
+                     'lion':15, 'pig':16, 'school bus':17, 'stove':18, 'table':19,
+                     'tiger':20, 'toaster':21, 'train':22, 'tree':23, 'van':24}
+cls_binary_biased = {'ambulance':0, 'car':1, 'cat':2, 'dog':3, 'lion':4,
+                     'pig':5, 'school bus':6, 'tiger':7, 'train':8, 'van':9 }
 def read_data(path, num):
     '''
     :param path: the path to the csv file to read

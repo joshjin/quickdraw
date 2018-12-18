@@ -12,12 +12,14 @@ import data_preproc
 from sklearn.metrics import roc_curve, auc
 
 warnings.filterwarnings("ignore")
-cls_dict_20cls = {'car':0, 'cat':1, 'cow':2, 'dog':3, 'duck':4, 'flower':5, 'mouse':6, 'school bus':7, 'train':8, 'tree':9}
 
 
 ############################################################
 # Run Experiment
 ############################################################
+
+large_class = {'cat', 'stove', 'computer', 'flower', 'car'}
+
 
 def print_img(im, label, size):
     data = im.copy().astype(int)
@@ -34,36 +36,76 @@ def extract_data(path):
     y_train = []
     X_test = []
     y_test = []
+    large_train_len = 3000
+    large_test_len = 200
+    short_train_len = 200
+    short_test_len = 200
     for file in os.listdir(path):
         print('class: ', str(file))
         print(os.path.join(path, file))
-        df = data_preproc.read_data(os.path.join(path, file), 10000)
+        flag = ''
+        if str(file).split(sep='.')[0] in large_class:
+            df = data_preproc.read_data(os.path.join(path, file), 10000)
+            train_len = large_train_len
+            test_len = large_test_len
+            flag = 'large'
+        else:
+            df = data_preproc.read_data(os.path.join(path, file), 2000)
+            train_len = short_train_len
+            test_len = short_test_len
+            flag = 'small'
         df = data_preproc.process_df(df)
         df = data_preproc.convert_df_into_image(df).reset_index()
         data_len =df.shape[0]
         print(df.shape)
-        X_train_np_tmp = np.zeros(shape=(min(data_len, 3000), 42, 42))
-        y_train_np_tmp = np.zeros(shape=(min(data_len, 3000),))
-        X_test_np_tmp = np.zeros(shape=(min(data_len, 200), 42, 42))
-        y_test_np_tmp = np.zeros(shape=(min(data_len, 200),))
-        for i in range(0, min(data_len, 3200)):
-            if i < 3000:
-                if i % 500 == 0:
-                    print(str(i), ' iterations')
-                X_tmp = df.loc[i, 'image']
-                y_tmp = df.loc[i, 'word']
-                X_tmp_square = X_tmp.reshape(42, 42)
-                X_train_np_tmp[i,:,:]=X_tmp_square
-                y_num = data_preproc.cls_dict[y_tmp]
-                y_train_np_tmp[i] = y_num
+        if flag == 'large':
+            X_train_np_tmp = np.zeros(shape=(min(data_len, train_len), 42, 42))
+            y_train_np_tmp = np.zeros(shape=(min(data_len, train_len),))
+            X_test_np_tmp = np.zeros(shape=(min(data_len, test_len), 42, 42))
+            y_test_np_tmp = np.zeros(shape=(min(data_len, test_len),))
+        else:
+            X_train_np_tmp = np.zeros(shape=(train_len*15, 42, 42))
+            y_train_np_tmp = np.zeros(shape=(train_len*15))
+            X_test_np_tmp = np.zeros(shape=(min(data_len, test_len), 42, 42))
+            y_test_np_tmp = np.zeros(shape=(min(data_len, test_len),))
+        for i in range(0, min(data_len, (train_len+test_len))):
+            if flag == 'large':
+                if i < train_len:
+                    # if i % 100 == 0:
+                    #     print(str(i), ' iterations')
+                    X_tmp = df.loc[i, 'image']
+                    y_tmp = df.loc[i, 'word']
+                    X_tmp_square = X_tmp.reshape(42, 42)
+                    X_train_np_tmp[i,:,:]=X_tmp_square
+                    y_num = data_preproc.cls_binary_biased[y_tmp]
+                    y_train_np_tmp[i] = y_num
+                else:
+                    X_tmp = df.loc[i, 'image']
+                    y_tmp = df.loc[i, 'word']
+                    X_tmp_square = X_tmp.reshape(42, 42)
+                    j = i - train_len
+                    X_test_np_tmp[j, :, :] = X_tmp_square
+                    y_num = data_preproc.cls_binary_biased[y_tmp]
+                    y_test_np_tmp[j] = y_num
             else:
-                X_tmp = df.loc[i, 'image']
-                y_tmp = df.loc[i, 'word']
-                X_tmp_square = X_tmp.reshape(42, 42)
-                j = i - 3000
-                X_test_np_tmp[j, :, :] = X_tmp_square
-                y_num = data_preproc.cls_dict[y_tmp]
-                y_test_np_tmp[j] = y_num
+                if i < train_len:
+                    # if i % 100 == 0:
+                    #     print(str(i), ' iterations')
+                    X_tmp = df.loc[i, 'image']
+                    y_tmp = df.loc[i, 'word']
+                    X_tmp_square = X_tmp.reshape(42, 42)
+                    y_num = data_preproc.cls_binary_biased[y_tmp]
+                    for j in range(0,15):
+                        X_train_np_tmp[i+j*200,:,:]=X_tmp_square
+                        y_train_np_tmp[i+j*200] = y_num
+                else:
+                    X_tmp = df.loc[i, 'image']
+                    y_tmp = df.loc[i, 'word']
+                    X_tmp_square = X_tmp.reshape(42, 42)
+                    j = i - train_len
+                    X_test_np_tmp[j, :, :] = X_tmp_square
+                    y_num = data_preproc.cls_binary_biased[y_tmp]
+                    y_test_np_tmp[j] = y_num
         X_train = X_train + X_train_np_tmp.tolist()
         y_train = y_train + y_train_np_tmp.tolist()
         X_test = X_test + X_test_np_tmp.tolist()
