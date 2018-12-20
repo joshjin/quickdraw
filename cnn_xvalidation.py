@@ -9,6 +9,9 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset
 from torch.autograd import Variable
 import data_preproc
+from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
+import itertools
 from sklearn.metrics import roc_curve, auc
 
 warnings.filterwarnings("ignore")
@@ -77,7 +80,7 @@ def extract_data(path):
                     y_tmp = df.loc[i, 'word']
                     X_tmp_square = X_tmp.reshape(42, 42)
                     X_train_np_tmp[i,:,:]=X_tmp_square
-                    y_num = data_preproc.cls_binary_biased[y_tmp]
+                    y_num = data_preproc.cls_ordered_small[y_tmp]
                     y_train_np_tmp[i] = y_num
                 else:
                     X_tmp = df.loc[i, 'image']
@@ -85,7 +88,7 @@ def extract_data(path):
                     X_tmp_square = X_tmp.reshape(42, 42)
                     j = i - train_len
                     X_test_np_tmp[j, :, :] = X_tmp_square
-                    y_num = data_preproc.cls_binary_biased[y_tmp]
+                    y_num = data_preproc.cls_ordered_small[y_tmp]
                     y_test_np_tmp[j] = y_num
             else:
                 if i < train_len:
@@ -94,7 +97,7 @@ def extract_data(path):
                     X_tmp = df.loc[i, 'image']
                     y_tmp = df.loc[i, 'word']
                     X_tmp_square = X_tmp.reshape(42, 42)
-                    y_num = data_preproc.cls_binary_biased[y_tmp]
+                    y_num = data_preproc.cls_ordered_small[y_tmp]
                     for j in range(0,15):
                         X_train_np_tmp[i+j*200,:,:]=X_tmp_square
                         y_train_np_tmp[i+j*200] = y_num
@@ -104,7 +107,7 @@ def extract_data(path):
                     X_tmp_square = X_tmp.reshape(42, 42)
                     j = i - train_len
                     X_test_np_tmp[j, :, :] = X_tmp_square
-                    y_num = data_preproc.cls_binary_biased[y_tmp]
+                    y_num = data_preproc.cls_ordered_small[y_tmp]
                     y_test_np_tmp[j] = y_num
         X_train = X_train + X_train_np_tmp.tolist()
         y_train = y_train + y_train_np_tmp.tolist()
@@ -168,7 +171,7 @@ class LeNet5(nn.Module):
         self.conv2 = nn.Conv2d(6, 16, 5, stride=1, padding=0)
         self.fc1 = nn.Linear(7 * 7 * 16, 400)
         self.fc2 = nn.Linear(400, 120)
-        self.fc3 = nn.Linear(120, 10)
+        self.fc3 = nn.Linear(120, 25)
 
     def forward(self, x):
         z1 = F.relu(self.conv1(x))
@@ -234,9 +237,43 @@ class Dataset(Dataset):
     def __getitem__(self, idx):
         return self.x_data[idx], self.y_data[idx]
 
+def plot_confusion_matrix(cm,
+                          normalize=False,
+                          title='Confusion matrix',
+                          cmap=plt.cm.Blues):
+    """
+    This function prints and plots the confusion matrix.
+    Normalization can be applied by setting `normalize=True`.
+    """
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        print("Normalized confusion matrix")
+    else:
+        print('Confusion matrix, without normalization')
+
+    print(cm)
+
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    # tick_marks = np.arange(len(classes))
+    # plt.xticks(tick_marks, classes, rotation=45)
+    # plt.yticks(tick_marks, classes)
+
+    fmt = '.2f' if normalize else 'd'
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt),
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+    plt.tight_layout()
+
 
 def run_experiment_with_subclass(neural_network, train_loader, test_loader, loss_function, optimizer):
-    max_epochs = 100
+    max_epochs = 12
     loss_np = np.zeros((max_epochs))
     train_accuracy = np.zeros((max_epochs))
     test_accuracy = np.zeros((max_epochs))
@@ -281,6 +318,11 @@ def run_experiment_with_subclass(neural_network, train_loader, test_loader, loss
             test_acc_tmp += float(test_correct) / float(test_total)
         test_accuracy[epoch] = test_acc_tmp / test_count
         print("epoch: ", str(epoch + 1), "test_acc: ", test_accuracy[epoch])
+
+    confusion_mat = confusion_matrix(test_labels, test_predicted)
+    plt.figure()
+    plot_confusion_matrix(confusion_mat,
+                          title='Confusion matrix, without normalization')
 
     # print("final training accuracy: ", test_accuracy[max_epochs-1])
     return test_accuracy, train_accuracy, loss_np

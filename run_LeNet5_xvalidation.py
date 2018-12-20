@@ -12,15 +12,17 @@ from torch.autograd import Variable
 from torchvision import transforms
 
 # an.load_data_for_alex('X.npy', 'y.npy')
-
-X_train, y_train, X_test, y_test = cnnxv.extract_data(os.path.join("large_small_data", "data2"))
-np.save('X_train_bin_bias.npy', X_train)
-np.save('y_train_bin_bias.npy', y_train)
-np.save('X_test_bin_bias.npy', X_test)
-np.save('y_test_bin_bias.npy', y_test)
-
 '''
-train_X, train_25_y = cnnxv.load_data('X_train_25.npy', 'y_train_25.npy')
+X_train, y_train, X_test, y_test = cnnxv.extract_data(os.path.join("large_small_data", "data"))
+np.save('X_train_25_weight.npy', X_train)
+np.save('y_train_25_weight.npy', y_train)
+np.save('X_test_25_weight.npy', X_test)
+np.save('y_test_25_weight.npy', y_test)
+'''
+
+
+
+train_X, train_25_y = cnnxv.load_data('X_train_25_weight.npy', 'y_train_25_weight.npy')
 print("raw train dim")
 print(train_X.shape)
 print(train_25_y.shape)
@@ -33,7 +35,7 @@ cnn_train_loader = DataLoader(dataset=cnn_train_dataset,
                           batch_size=64,
                           shuffle=True)
 
-test_X, test_25_y = cnnxv.load_data('X_test_25.npy', 'y_test_25.npy')
+test_X, test_25_y = cnnxv.load_data('X_test_25_weight.npy', 'y_test_25_weight.npy')
 print("raw test dim")
 print(test_X.shape)
 print(test_25_y.shape)
@@ -50,6 +52,8 @@ cnn_test_loader = DataLoader(dataset=cnn_test_dataset,
 # print('largest class: ', str(np.amax(train_5_y)))
 # print('largest class: ', str(np.amax(test_5_y)))
 
+
+'''
 train_v = []
 test_v = []
 print('For train')
@@ -66,9 +70,9 @@ print(test_v)
 print(test_25_y[0:10])
 print(train_25_y[0:10])
 '''
-'''
+
 print('\ninit NN')
-CNN = an.LeNet5()
+CNN = cnnxv.LeNet5()
 
 print('\ninit optimizer')
 optimizer1 = optim.SGD(CNN.parameters(), lr=0.005, momentum=0.9)
@@ -77,7 +81,7 @@ print('\ninit loss fn')
 criterion = nn.CrossEntropyLoss()
 
 print('\ntraining')
-cnn_norm_test_accuracy, cnn_norm_train_accuracy, cnn_norm_loss = an.run_experiment(CNN, cnn_train_loader, cnn_test_loader, criterion, optimizer1)
+cnn_norm_test_accuracy, cnn_norm_train_accuracy, cnn_norm_loss = cnnxv.run_experiment(CNN, cnn_train_loader, cnn_test_loader, criterion, optimizer1)
 
 print('\nterm')
-'''
+
