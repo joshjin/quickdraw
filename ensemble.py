@@ -265,9 +265,6 @@ from numpy import vectorize
 get_ipython().run_line_magic('matplotlib', 'inline')
 import json
 import time
-import feature_engineering_func as fe_func
-#import cnn_func
-import ensemble_method_func as em_func
 from sklearn.model_selection import train_test_split
 import xgboost as XGB
 from sklearn.model_selection import GridSearchCV
