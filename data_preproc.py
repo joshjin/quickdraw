@@ -25,6 +25,8 @@ cls_ordered_small = {'ambulance':0, 'bed':1, 'bush':2, 'camera':3, 'car':4,
                      'tiger':20, 'toaster':21, 'train':22, 'tree':23, 'van':24}
 cls_binary_biased = {'ambulance':0, 'car':1, 'cat':2, 'dog':3, 'lion':4,
                      'pig':5, 'school bus':6, 'tiger':7, 'train':8, 'van':9 }
+#large_class = {'cat', 'stove', 'computer', 'flower', 'car'}
+
 def read_data(path, num):
     '''
     :param path: the path to the csv file to read

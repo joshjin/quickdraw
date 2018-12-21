@@ -17,10 +17,12 @@ import itertools
 from sklearn.metrics import roc_curve, auc
 
 real_y = np.load('conf_real.npy')
-print(real_y)
+print(len(real_y))
 pred_y = np.load('conf_pred.npy')
+print(len(pred_y))
 
 confusion_mat = confusion_matrix(real_y, pred_y)
 plt.figure()
 cnnxv.plot_confusion_matrix(confusion_mat,
-                          title='Confusion matrix, without normalization')
+                          title='Confusion matrix, normalization')
+plt.show()

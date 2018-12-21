@@ -272,13 +272,15 @@ def plot_confusion_matrix(cm,
     plt.tight_layout()
 
 
+
+
 def run_experiment_with_subclass(neural_network, train_loader, test_loader, loss_function, optimizer):
-    max_epochs = 12
+    real_label = []
+    pred_label = []
+    max_epochs = 13
     loss_np = np.zeros((max_epochs))
     train_accuracy = np.zeros((max_epochs))
     test_accuracy = np.zeros((max_epochs))
-    test_labels_np = []
-    test_predicted_np = []
     for epoch in range(max_epochs):
         train_count = 0
         train_acc_tmp = 0.0
@@ -317,13 +319,15 @@ def run_experiment_with_subclass(neural_network, train_loader, test_loader, loss
             test_labels_np = test_labels.data.numpy()
             test_correct += (test_predicted_np == test_labels_np).sum().item()
             test_acc_tmp += float(test_correct) / float(test_total)
+            if epoch == max_epochs-1:
+                real_label = real_label + test_labels_np.tolist()
+                pred_label = pred_label + test_predicted_np.tolist()
         test_accuracy[epoch] = test_acc_tmp / test_count
         print("epoch: ", str(epoch + 1), "test_acc: ", test_accuracy[epoch])
 
-    print(test_labels.data)
-    print(test_labels_np)
-    np.save('conf_real.npy', test_labels_np)
-    np.save('conf_pred.npy', test_predicted_np)
+    print(len(real_label))
+    np.save('conf_real.npy', real_label)
+    np.save('conf_pred.npy', pred_label)
 
     # confusion_mat = confusion_matrix(test_labels, test_predicted)
     # plt.figure()
