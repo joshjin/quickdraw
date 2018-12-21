@@ -81,7 +81,7 @@ print('\ninit loss fn')
 criterion = nn.CrossEntropyLoss()
 
 print('\ntraining')
-cnn_norm_test_accuracy, cnn_norm_train_accuracy, cnn_norm_loss = cnnxv.run_experiment(CNN, cnn_train_loader, cnn_test_loader, criterion, optimizer1)
+cnn_norm_test_accuracy, cnn_norm_train_accuracy, cnn_norm_loss = cnnxv.run_experiment_with_subclass(CNN, cnn_train_loader, cnn_test_loader, criterion, optimizer1)
 
 print('\nterm')
 

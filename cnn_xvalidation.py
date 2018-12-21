@@ -277,7 +277,8 @@ def run_experiment_with_subclass(neural_network, train_loader, test_loader, loss
     loss_np = np.zeros((max_epochs))
     train_accuracy = np.zeros((max_epochs))
     test_accuracy = np.zeros((max_epochs))
-
+    test_labels_np = []
+    test_predicted_np = []
     for epoch in range(max_epochs):
         train_count = 0
         train_acc_tmp = 0.0
@@ -319,10 +320,15 @@ def run_experiment_with_subclass(neural_network, train_loader, test_loader, loss
         test_accuracy[epoch] = test_acc_tmp / test_count
         print("epoch: ", str(epoch + 1), "test_acc: ", test_accuracy[epoch])
 
-    confusion_mat = confusion_matrix(test_labels, test_predicted)
-    plt.figure()
-    plot_confusion_matrix(confusion_mat,
-                          title='Confusion matrix, without normalization')
+    print(test_labels.data)
+    print(test_labels_np)
+    np.save('conf_real.npy', test_labels_np)
+    np.save('conf_pred.npy', test_predicted_np)
+
+    # confusion_mat = confusion_matrix(test_labels, test_predicted)
+    # plt.figure()
+    # plot_confusion_matrix(confusion_mat,
+    #                       title='Confusion matrix, without normalization')
 
     # print("final training accuracy: ", test_accuracy[max_epochs-1])
     return test_accuracy, train_accuracy, loss_np
